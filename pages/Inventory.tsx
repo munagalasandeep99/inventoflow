@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { InventoryItem } from '../types';
 import { fetchItems, deleteItem, updateItem } from '../services/api';
@@ -6,7 +7,7 @@ import InventoryForm from '../components/inventory/InventoryForm';
 import InventoryDetails from '../components/inventory/InventoryDetails';
 import { SearchIcon, FilterIcon } from '../components/Icons';
 
-const StockUpdateModal: React.FC<{item: InventoryItem, onClose: () => void, onRefresh: (data: InventoryItem) => void}> = ({ item, onClose, onRefresh }) => {
+const StockUpdateModal: React.FC<{item: InventoryItem, onClose: () => void, onRefresh: () => void}> = ({ item, onClose, onRefresh }) => {
     const [change, setChange] = useState(0);
 
     const handleUpdate = async () => {
@@ -16,13 +17,11 @@ const StockUpdateModal: React.FC<{item: InventoryItem, onClose: () => void, onRe
             return;
         }
         try {
-            const updatedItem = { ...item, quantity: newQuantity };
-            await updateItem(updatedItem);
-            onRefresh(updatedItem);
+            await updateItem({ itemId: item.itemId, quantity: newQuantity });
+            onRefresh();
             onClose();
         } catch(e) {
             alert("Failed to update stock.");
-            console.error(e);
         }
     }
 
@@ -67,7 +66,6 @@ const Inventory: React.FC = () => {
 
     const fetchAllItems = useCallback(async () => {
         try {
-            setLoading(true);
             const fetchedItems = await fetchItems();
             setItems(fetchedItems);
             setError(null);
@@ -80,17 +78,29 @@ const Inventory: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        setLoading(true);
         fetchAllItems();
     }, [fetchAllItems]);
+    
+    useEffect(() => {
+        if (selectedItem) {
+            const updatedSelectedItem = items.find(item => item.itemId === selectedItem.itemId);
+            if (updatedSelectedItem) {
+                if (JSON.stringify(updatedSelectedItem) !== JSON.stringify(selectedItem)) {
+                   setSelectedItem(updatedSelectedItem);
+                }
+            } else {
+                setSelectedItem(null);
+            }
+        }
+    }, [items, selectedItem]);
+
 
     const handleDeleteItem = async (itemId: string) => {
         if (window.confirm('Are you sure you want to delete this item?')) {
             try {
                 await deleteItem(itemId);
-                setItems(prev => prev.filter(item => item.itemId !== itemId));
-                if (selectedItem?.itemId === itemId) {
-                    setSelectedItem(null);
-                }
+                await fetchAllItems();
             } catch (err) {
                 setError('Failed to delete item.');
                 console.error(err);
@@ -103,19 +113,10 @@ const Inventory: React.FC = () => {
         setIsFormModalOpen(true);
     };
     
-    const handleFormSubmit = async (formData: Partial<InventoryItem> & { itemId?: string }) => {
-       if (!editingItem || !formData.itemId) {
-            setError("Cannot update: item identifier is missing.");
-            return;
-        }
-
+    const handleFormSubmit = async (formData: InventoryItem) => {
         try {
-            const updatedItem = { ...editingItem, ...formData };
-            await updateItem(updatedItem);
-
-            setItems(prev => prev.map(i => (i.itemId === updatedItem.itemId ? updatedItem : i)));
-            setSelectedItem(prev => (prev?.itemId === updatedItem.itemId ? updatedItem : prev));
-            
+            await updateItem(formData);
+            await fetchAllItems();
             setIsFormModalOpen(false);
             setEditingItem(null);
         } catch (err) {
@@ -133,12 +134,9 @@ const Inventory: React.FC = () => {
         setIsStockUpdateModalOpen(true);
     };
 
-    const handleStockUpdateSuccess = (updatedItem: InventoryItem) => {
-        setItems(prevItems => prevItems.map(item => 
-            item.itemId === updatedItem.itemId ? updatedItem : item
-        ));
-        setSelectedItem(prev => prev?.itemId === updatedItem.itemId ? updatedItem : prev);
+     const handleStockUpdateSuccess = async () => {
         setIsStockUpdateModalOpen(false);
+        await fetchAllItems();
     };
 
     const categories = useMemo(() => ['All', ...new Set(items.map(item => item.category).filter(Boolean))], [items]);
@@ -200,7 +198,7 @@ const Inventory: React.FC = () => {
                         <InventoryDetails 
                             item={selectedItem}
                             onEdit={handleEditItem}
-                            onDelete={() => handleDeleteItem(selectedItem.itemId)}
+                            onDelete={handleDeleteItem}
                             onUpdateStock={handleUpdateStock}
                         />
                     ) : (

@@ -102,27 +102,11 @@ export async function updateItem(itemData: Partial<InventoryItem> & { itemId: st
     });
     
     if (!response.ok) {
-      let errorMessage = `API error: ${response.status}`;
-      try {
-        const errorData = await response.json();
-        if (errorData && errorData.message) {
-          errorMessage = errorData.message;
-        }
-      } catch (e) {
-        // Body was not JSON or empty, use default error message
-      }
-      throw new Error(errorMessage);
+      const errorData = await response.json();
+      throw new Error(errorData.message || `API error: ${response.status}`);
     }
     
-    const text = await response.text();
-    try {
-        // Return parsed JSON if possible, otherwise an empty object for success
-        return text ? JSON.parse(text) : {};
-    } catch (e) {
-        // Handle cases where API returns a non-JSON string like "OK" on success
-        console.warn('API success response was not valid JSON:', text);
-        return {};
-    }
+    return await response.json();
   } catch (error) {
     console.error(`Error updating item ${itemData.itemId}:`, error);
     throw error;
@@ -138,28 +122,12 @@ export async function deleteItem(itemId: string): Promise<any> {
       headers: { ...authHeader },
     });
     
-     if (!response.ok) {
-      let errorMessage = `API error: ${response.status}`;
-      try {
-        const errorData = await response.json();
-        if (errorData && errorData.message) {
-          errorMessage = errorData.message;
-        }
-      } catch (e) {
-         // Body was not JSON or empty, use default error message
-      }
-      throw new Error(errorMessage);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `API error: ${response.status}`);
     }
     
-    const text = await response.text();
-    try {
-        // Return parsed JSON if possible, otherwise an empty object for success
-        return text ? JSON.parse(text) : {};
-    } catch (e) {
-        // Handle cases where API returns a non-JSON string like "OK" on success
-        console.warn('API success response was not valid JSON:', text);
-        return {};
-    }
+    return await response.json();
   } catch (error) {
     console.error(`Error deleting item ${itemId}:`, error);
     throw error;
