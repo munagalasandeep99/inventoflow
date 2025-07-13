@@ -87,7 +87,7 @@ const Dashboard: React.FC = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <StatCard title="Total Products" value={totalItems.toString()} icon={<IconBox className="h-6 w-6" />} />
-                <StatCard title="Total Inventory Value" value={`₹${totalValue.toLocaleString('en-IN')}`} icon={<IconCurrency className="h-6 w-6" />} />
+                <StatCard title="Total Inventory Value" value={`${totalValue.toLocaleString('en-IN')}`} icon={<IconCurrency className="h-6 w-6" />} />
                 <StatCard title="Low Stock Alerts" value={lowStockItems.length.toString()} icon={<IconAlert className="h-6 w-6" />} />
                 <StatCard title="Out of Stock" value={outOfStockItemsCount.toString()} icon={<IconOutOfStock className="h-6 w-6" />} />
             </div>
