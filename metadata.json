@@ -1,0 +1,5 @@
+{
+  "name": "InventoFlow - Inventory Management",
+  "description": "A modern, sleek inventory management application to track items, manage stock levels, and view sales history. Built with React and Tailwind CSS.",
+  "requestFramePermissions": []
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InventoFlow - Inventory Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#3b82f6', // blue-500
+              'primary-hover': '#2563eb', // blue-600
+              'primary-focus': 'rgba(59, 130, 246, 0.5)',
+              secondary: '#1f2937', // gray-800
+              'secondary-light': '#374151', // gray-700
+              'light': '#f9fafb', // gray-50
+              'medium': '#d1d5db', // gray-300
+            },
+          },
+        },
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.6.3",
+    "recharts": "https://esm.sh/recharts@^3.1.0",
+    "amazon-cognito-identity-js": "https://esm.sh/amazon-cognito-identity-js@^6.3.1"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-light">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
